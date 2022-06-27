@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "caeruleusTait.WorldGen.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ChunkMapAccessor",
+    "ChunkSerializerMixin",
+    "ChunkStorageAccessor",
+    "IOWorkerAccessor",
+    "MinecraftServerAccessor",
+    "PersistentEntitySectionManagerAccessor",
+    "ProtoChunkAccessor",
+    "ProtoChunkMixin",
+    "RegionFileStorageAccessor",
+    "RegionFileStorageMixin",
+    "SectionStorageAccessor",
+    "ServerLevelMixinAccessor"
+  ],
+  "client": [
+    "ScreenAccessor",
+    "SelectWorldScreenMixin",
+    "WorldListEntryAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "world-gen.refmap.json"
+}
