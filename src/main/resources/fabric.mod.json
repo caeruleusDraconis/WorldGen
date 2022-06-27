@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "world-gen",
+  "version": "${version}",
+
+  "name": "WorldGen",
+  "description": "WorldGen is a mod for pre-generating Minecraft worlds, with a main focus on SPEED.",
+  "authors": [
+    "Caeruleus Draconis",
+    "Taiterio"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/world-gen"
+  },
+
+  "license": "Apache-2.0",
+  "icon": "icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "caeruleusTait.WorldGen.WorldGen"
+    ]
+  },
+  "mixins": [
+    "world-gen.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.6",
+    "fabric": "*",
+    "minecraft": "~1.19",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
