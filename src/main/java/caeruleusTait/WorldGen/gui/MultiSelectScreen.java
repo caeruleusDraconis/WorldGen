@@ -3,13 +3,13 @@
 
 package caeruleusTait.WorldGen.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -87,12 +87,12 @@ public class MultiSelectScreen<T> extends Screen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderBackground(poseStack);
-        theList.render(poseStack, i, j, f);
-        drawCenteredString(poseStack, font, title, width / 2, 8, 16777215);
-        drawCenteredString(poseStack, font, subtitle, width / 2, 28, 10526880);
-        super.render(poseStack, i, j, f);
+    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderBackground(guiGraphics);
+        theList.render(guiGraphics, i, j, f);
+        guiGraphics.drawCenteredString(font, title, width / 2, 8, 16777215);
+        guiGraphics.drawCenteredString(font, subtitle, width / 2, 28, 10526880);
+        super.render(guiGraphics, i, j, f);
     }
 
     private void updateButtonValidity() {
@@ -127,8 +127,8 @@ public class MultiSelectScreen<T> extends Screen {
         }
 
         @Override
-        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            GuiComponent.drawString(poseStack, font, name, k + 5, j + 2, 16777215);
+        public void render(@NotNull GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            guiGraphics.drawString(font, name, k + 5, j + 2, 16777215);
         }
 
         @Override

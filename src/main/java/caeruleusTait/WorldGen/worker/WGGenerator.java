@@ -17,6 +17,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.entity.EntityType;
@@ -61,7 +62,7 @@ public class WGGenerator {
         cfg = WGConfigState.get();
 
         maxThreads = Math.min(cfg.enableThreads ? cfg.maxThreads : 1, maxPossibleThreads);
-        chunksToKeep = maxThreads * 650;
+        chunksToKeep = maxThreads * 1000;
 
         chunkStorage = new WGChunkStorage(chunksToKeep * 2);
 
@@ -130,15 +131,9 @@ public class WGGenerator {
         }
     }
 
-    private WGChunkHolder ensureLightStored(WGChunkHolder chunkHolder) {
-        if (chunkHolder.getStatus().isOrAfter(ChunkStatus.LIGHT)) {
-            chunkHolder.storeLightData(level.getLightEngine());
-        }
-        return chunkHolder;
-    }
-
     public WGChunkHolder loadOrGen(ChunkPos chunkPos, ChunkStatus chunkStatus, boolean lock) {
-        long posIDX = chunkPos.toLong();
+        final long posIDX = chunkPos.toLong();
+        final WGInlineLeveLightEngine lightEngine = level.getLightEngine();
 
         WGChunkStorage.MaybeExistingChunk maybeExistingFuture = chunkStorage.getMaxChunkHolder(posIDX, chunkStatus, lock);
 
@@ -162,6 +157,11 @@ public class WGGenerator {
         } else {
             // We need to load or generate one
             ChunkAccess chunkAccess = load(chunkPos);
+
+            // Ensure the data is actually loaded in the light engine
+            if (chunkAccess.getStatus().isOrAfter(ChunkStatus.INITIALIZE_LIGHT)) {
+                lightEngine.prepareLoadedChunk(chunkAccess);
+            }
             chunkHolder = chunkStorage.markChunkLoaded(chunkAccess);
             if (lock) {
                 chunkHolder.lock();
@@ -173,7 +173,7 @@ public class WGGenerator {
         ChunkAccess chunkAccess;
         if (chunkHolder.getStatus().isOrAfter(chunkStatus)) {
             if (chunkHolder.getStatus().isOrAfter(ChunkStatus.LIGHT)) {
-                chunkHolder.storeLightData(level.getLightEngine());
+                chunkHolder.storeLightData(lightEngine);
             }
             return chunkHolder;
         } else {
@@ -204,7 +204,7 @@ public class WGGenerator {
         chunkProgressListener.onStatusChange(chunkPos, chunkAccess.getStatus());
         chunkHolder = chunkStorage.markChunkLoaded(chunkAccess);
         if (chunkAccess.getStatus().isOrAfter(ChunkStatus.LIGHT)) {
-            chunkHolder.storeLightData(level.getLightEngine());
+            chunkHolder.storeLightData(lightEngine);
         }
         return chunkHolder;
     }
@@ -281,16 +281,30 @@ public class WGGenerator {
 
         SimpleClosable accessorHandle = null;
         try {
-            if (chunkStatus.equals(ChunkStatus.LIGHT)) {
+            if (chunkStatus.equals(ChunkStatus.INITIALIZE_LIGHT)) {
                 // Custom logic because we don't want to use the ThreadedLevelLightEngine
+                final WGInlineLeveLightEngine lightEngine = level.getLightEngine();
+
                 chunkAccess.setLightCorrect(false);
+                ((ProtoChunk)chunkAccess).setLightEngine(lightEngine);
+
+                if (!chunkAccess.getStatus().isOrAfter(ChunkStatus.INITIALIZE_LIGHT)) {
+                    ((ProtoChunk) chunkAccess).setStatus(ChunkStatus.INITIALIZE_LIGHT);
+                }
+
+                chunkAccess = lightEngine.initializeLight(chunkAccess);
+
+            } else if (chunkStatus.equals(ChunkStatus.LIGHT)) {
+                // Custom logic because we don't want to use the ThreadedLevelLightEngine
+                final WGInlineLeveLightEngine lightEngine = level.getLightEngine();
+
+                ((ProtoChunk)chunkAccess).setLightEngine(lightEngine);
 
                 if (!chunkAccess.getStatus().isOrAfter(ChunkStatus.LIGHT)) {
                     ((ProtoChunk) chunkAccess).setStatus(ChunkStatus.LIGHT);
                 }
 
-                final boolean bl = chunkAccess.getStatus().isOrAfter(ChunkStatus.LIGHT) && chunkAccess.isLightCorrect();
-                chunkAccess = level.getLightEngine().lightChunk(chunkAccess, bl);
+                chunkAccess = lightEngine.lightChunk(chunkAccess);
 
             } else {
                 accessorHandle = level.genServerChunkCacheWhitelist();
@@ -301,8 +315,7 @@ public class WGGenerator {
                         chunkMapAccessor.getStructureTemplateManager(),
                         fakeThreadedLightEngine,
                         this::wgProtoChunkToLevelChunk,
-                        chunkSquare.stream().map(WGChunkHolder::chunkAccess).toList(),
-                        false
+                        chunkSquare.stream().map(WGChunkHolder::chunkAccess).toList()
                 ).get().left().get();
             }
 
@@ -366,9 +379,13 @@ public class WGGenerator {
             });
         }
 
-        levelChunk.setFullStatus(() -> ChunkHolder.FullChunkStatus.TICKING);
+        levelChunk.setFullStatus(() -> FullChunkStatus.ENTITY_TICKING);
         levelChunk.runPostLoad();
         levelChunk.setLoaded(true);
+
+        // Should not be required, since the game is not running
+        // levelChunk.registerAllBlockEntitiesAfterLevelLoad();
+        // levelChunk.registerTickContainerInLevel(this.level);
 
         // Entities are stored separately and must ONLY be saved when the corresponding
         // generation stage us run!

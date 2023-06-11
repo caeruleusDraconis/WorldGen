@@ -15,6 +15,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -68,12 +69,11 @@ public class WGLoadingScreen extends Screen {
         object2IntOpenHashMap.put(ChunkStatus.BIOMES, nativeColor(0x80B252));
         object2IntOpenHashMap.put(ChunkStatus.NOISE, nativeColor(0xD1D1D1));
         object2IntOpenHashMap.put(ChunkStatus.SURFACE, nativeColor(0x726809));
-        object2IntOpenHashMap.put(ChunkStatus.CARVERS, nativeColor(0x6D665C));
-        object2IntOpenHashMap.put(ChunkStatus.LIQUID_CARVERS, nativeColor(0x303572));
+        object2IntOpenHashMap.put(ChunkStatus.CARVERS, nativeColor(0x303572));
         object2IntOpenHashMap.put(ChunkStatus.FEATURES, nativeColor(0x21C600));
-        object2IntOpenHashMap.put(ChunkStatus.LIGHT, nativeColor(0xCCCCCC));
+        object2IntOpenHashMap.put(ChunkStatus.INITIALIZE_LIGHT, nativeColor(0xCCCCCC));
+        object2IntOpenHashMap.put(ChunkStatus.LIGHT, nativeColor(0xFFE0A0));
         object2IntOpenHashMap.put(ChunkStatus.SPAWN, nativeColor(0xF26060));
-        object2IntOpenHashMap.put(ChunkStatus.HEIGHTMAPS, nativeColor(0xEEEEEE));
         object2IntOpenHashMap.put(ChunkStatus.FULL, nativeColor(0xFFFFFF));
     });
 
@@ -86,12 +86,11 @@ public class WGLoadingScreen extends Screen {
         object2IntOpenHashMap.put(ChunkStatus.BIOMES, nativeColor(0x809252));
         object2IntOpenHashMap.put(ChunkStatus.NOISE, nativeColor(0xA1A1A1));
         object2IntOpenHashMap.put(ChunkStatus.SURFACE, nativeColor(0x423409));
-        object2IntOpenHashMap.put(ChunkStatus.CARVERS, nativeColor(0x3D362C));
-        object2IntOpenHashMap.put(ChunkStatus.LIQUID_CARVERS, nativeColor(0x101542));
+        object2IntOpenHashMap.put(ChunkStatus.CARVERS, nativeColor(0x101542));
         object2IntOpenHashMap.put(ChunkStatus.FEATURES, nativeColor(0x215600));
-        object2IntOpenHashMap.put(ChunkStatus.LIGHT, nativeColor(0x8C8C8C));
+        object2IntOpenHashMap.put(ChunkStatus.INITIALIZE_LIGHT, nativeColor(0x8C8C8C));
+        object2IntOpenHashMap.put(ChunkStatus.LIGHT, nativeColor(0x917249));
         object2IntOpenHashMap.put(ChunkStatus.SPAWN, nativeColor(0xB26060));
-        object2IntOpenHashMap.put(ChunkStatus.HEIGHTMAPS, nativeColor(0xAEAEAE));
         object2IntOpenHashMap.put(ChunkStatus.FULL, nativeColor(0xBFBFBF));
     });
 
@@ -213,7 +212,7 @@ public class WGLoadingScreen extends Screen {
     }
 
     @Override
-    public void render(@NotNull PoseStack poseStack, int i, int j, float f) {
+    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
         if(this.done) {
             this.triggerImmediateNarration(true);
             this.onClose();
@@ -240,8 +239,8 @@ public class WGLoadingScreen extends Screen {
             }
         }
 
-        this.renderBackground(poseStack);
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
+        this.renderBackground(guiGraphics);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
 
         // Narration function of minecraft
         long l = Util.getMillis();
@@ -254,9 +253,9 @@ public class WGLoadingScreen extends Screen {
         int xCenter = this.width / 2;
         int top = 20 + this.font.lineHeight;
 
-        WGLoadingScreen.drawCenteredString(poseStack, this.font, this.getFormattedProgress(), xCenter, top, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, this.getFormattedProgress(), xCenter, top, 0xFFFFFF);
         top += 5 + this.font.lineHeight;
-        WGLoadingScreen.drawCenteredString(poseStack, this.font, String.format("%.1f CPS   [%d/%d]", cps, this.main.getGenCount(), chunkTotal), xCenter, top, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, String.format("%.1f CPS   [%d/%d]", cps, this.main.getGenCount(), chunkTotal), xCenter, top, 0xFFFFFF);
         top += 5 + this.font.lineHeight;
 
         int verticalSpace = this.btnReturn.getY() - 10 - top;
@@ -266,7 +265,7 @@ public class WGLoadingScreen extends Screen {
 
         if (cfg.enableProgress) {
             renderChunks(
-                    poseStack,
+                    guiGraphics,
                     this.progressListener,
                     xCenter - radius,
                     xCenter + radius,
@@ -275,10 +274,10 @@ public class WGLoadingScreen extends Screen {
             );
         }
 
-        super.render(poseStack, i, j, f);
+        super.render(guiGraphics, i, j, f);
     }
 
-    public void renderChunks(PoseStack poseStack, WGChunkProgressListener chunkProgressListener, int xMin, int xMax, int yMin, int yMax) {
+    public void renderChunks(@NotNull GuiGraphics guiGraphics, WGChunkProgressListener chunkProgressListener, int xMin, int xMax, int yMin, int yMax) {
         int diameter = chunkProgressListener.getDiameter();
         int colorBorder = 0xFF666666;
 
@@ -293,10 +292,10 @@ public class WGLoadingScreen extends Screen {
         renderTexture(xMin, yMin, xMax, yMax, diameter);
 
         // Create a border
-        WGLoadingScreen.fill(poseStack, xMin-1, yMin-1, xMax+1, yMin, colorBorder); // Right
-        WGLoadingScreen.fill(poseStack, xMax, yMin, xMax+1, yMax, colorBorder); // Down
-        WGLoadingScreen.fill(poseStack, xMin-1, yMax, xMax+1, yMax+1, colorBorder); // Left
-        WGLoadingScreen.fill(poseStack, xMin-1, yMin, xMin, yMax, colorBorder); // Up
+        guiGraphics.fill(xMin-1, yMin-1, xMax+1, yMin, colorBorder); // Right
+        guiGraphics.fill(xMax, yMin, xMax+1, yMax, colorBorder); // Down
+        guiGraphics.fill(xMin-1, yMax, xMax+1, yMax+1, colorBorder); // Left
+        guiGraphics.fill(xMin-1, yMin, xMin, yMax, colorBorder); // Up
     }
 
     public void updateTexture(int diameter, WGChunkProgressListener chunkProgressListener) {

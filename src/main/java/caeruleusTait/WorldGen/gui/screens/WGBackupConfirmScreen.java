@@ -5,11 +5,13 @@ package caeruleusTait.WorldGen.gui.screens;
 
 import caeruleusTait.WorldGen.gui.GUIFactory;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 public class WGBackupConfirmScreen extends Screen {
     private final Runnable onConfirm;
@@ -38,11 +40,11 @@ public class WGBackupConfirmScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderBackground(poseStack);
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 25, 0xFFFFFF);
-        multiLineLabel.renderCentered(poseStack, width / 2, 70);
-        super.render(poseStack, i, j, f);
+    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderBackground(guiGraphics);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 25, 0xFFFFFF);
+        multiLineLabel.renderCentered(guiGraphics, width / 2, 70);
+        super.render(guiGraphics, i, j, f);
     }
 
     private void onAccept(Button btn) {

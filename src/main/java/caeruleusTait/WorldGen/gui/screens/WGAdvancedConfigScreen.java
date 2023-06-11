@@ -8,16 +8,15 @@ import caeruleusTait.WorldGen.gui.GUIFactory;
 import caeruleusTait.WorldGen.gui.MultiSelectScreen;
 import caeruleusTait.WorldGen.gui.widgets.WGCheckbox;
 import caeruleusTait.WorldGen.gui.widgets.WGLabel;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -228,9 +227,9 @@ public class WGAdvancedConfigScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderBackground(poseStack);
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFF);
-        super.render(poseStack, i, j, f);
+    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderBackground(guiGraphics);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        super.render(guiGraphics, i, j, f);
     }
 }

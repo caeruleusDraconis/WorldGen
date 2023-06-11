@@ -4,6 +4,7 @@
 package caeruleusTait.WorldGen.worker.storage;
 
 import caeruleusTait.WorldGen.util.SimpleClosable;
+import caeruleusTait.WorldGen.worker.WGInlineLeveLightEngine;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.world.level.ChunkPos;
@@ -65,16 +66,21 @@ public class WGChunkHolder {
     }
 
     public synchronized void storeLightData(LevelLightEngine engine) {
-        if (lightData != null) {
-            return;
-        }
         lightData = new WGLightEngineData(engine, chunkAccess.getPos());
         lightLoadedIn.add(Thread.currentThread().getId());
     }
 
-    public synchronized void ensureLightDataLoaded(LevelLightEngine engine) {
-        if (lightData != null && lightLoadedIn.add(Thread.currentThread().getId())) {
-            lightData.loadLightEngineData(engine);
+    public synchronized void ensureLightDataLoaded(WGInlineLeveLightEngine engine) {
+        if (chunkAccess.getStatus().equals(ChunkStatus.INITIALIZE_LIGHT)) {
+            engine.initializeLight(chunkAccess);
+        }
+        if (!chunkAccess.getStatus().isOrAfter(ChunkStatus.LIGHT)) {
+            return;
+        }
+        if (lightLoadedIn.add(Thread.currentThread().getId())) {
+            if (lightData != null) {
+                lightData.loadLightEngineData(engine);
+            }
         }
     }
 

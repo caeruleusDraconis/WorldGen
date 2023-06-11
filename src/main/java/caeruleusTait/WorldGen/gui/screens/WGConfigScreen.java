@@ -3,20 +3,16 @@
 
 package caeruleusTait.WorldGen.gui.screens;
 
-import caeruleusTait.WorldGen.gui.GUIFactory;
-import caeruleusTait.WorldGen.gui.MultiSelectScreen;
-import caeruleusTait.WorldGen.gui.widgets.WGLabel;
-import caeruleusTait.WorldGen.util.Utils;
-import com.mojang.blaze3d.vertex.PoseStack;
 import caeruleusTait.WorldGen.WorldGen;
 import caeruleusTait.WorldGen.config.PregenSizeMode;
 import caeruleusTait.WorldGen.config.WGConfigState;
 import caeruleusTait.WorldGen.gui.GUIFactory;
 import caeruleusTait.WorldGen.gui.MultiSelectScreen;
 import caeruleusTait.WorldGen.gui.widgets.WGLabel;
+import caeruleusTait.WorldGen.util.Utils;
 import caeruleusTait.WorldGen.worker.WGChunkGenWorkHost;
 import caeruleusTait.WorldGen.worker.WGMain;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -34,7 +30,6 @@ import net.minecraft.server.RegistryLayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -564,9 +559,9 @@ public class WGConfigScreen extends Screen {
     }
 
     @Override
-    public void render(@NotNull PoseStack poseStack, int i, int j, float f) {
-        this.renderBackground(poseStack);
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
-        super.render(poseStack, i, j, f);
+    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderBackground(guiGraphics);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
+        super.render(guiGraphics, i, j, f);
     }
 }

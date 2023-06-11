@@ -87,7 +87,7 @@ public final class WGChunkListGenerator {
         boolean multiColumn = false;
 
         // Check if we can split it in the x-axis as well, if we have enough threads and the field is wide enough
-        if((taskRowCount < maxThreads / 2) && (width > (24 + 2*rowHeight))) {
+        if((taskRowCount < maxThreads) && (width > (24 + 2*rowHeight))) {
             totalCount = totalCount * 2 + 1;
             colCount = 2;
             multiColumn = true;

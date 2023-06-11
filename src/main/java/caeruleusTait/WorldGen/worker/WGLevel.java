@@ -23,6 +23,7 @@ import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
@@ -89,7 +90,8 @@ public class WGLevel extends ServerLevel {
                 isDebug,
                 BiomeManager.obfuscateSeed(main.worldData().worldGenOptions().seed()), // MinecraftServer.createLevels
                 customSpawners,
-                tickTime
+                tickTime,
+                new RandomSequences(main.worldData().worldGenOptions().seed())
         );
 
         final ServerChunkCache serverChunkCache = super.getChunkSource();

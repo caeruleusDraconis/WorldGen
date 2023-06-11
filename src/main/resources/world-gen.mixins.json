@@ -10,12 +10,12 @@
     "IOWorkerAccessor",
     "MinecraftServerAccessor",
     "PersistentEntitySectionManagerAccessor",
-    "ProtoChunkAccessor",
-    "ProtoChunkMixin",
     "RegionFileStorageAccessor",
     "RegionFileStorageMixin",
     "SectionStorageAccessor",
-    "ServerLevelMixinAccessor"
+    "ServerLevelMixinAccessor",
+    "StructureTemplatePaletteAccessor",
+    "StructureTemplatePaletteMixin"
   ],
   "client": [
     "ScreenAccessor",

@@ -3,13 +3,14 @@
 
 package caeruleusTait.WorldGen.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 public class WGLabel implements Renderable, GuiEventListener, NarratableEntry {
     private Font font;
@@ -76,9 +77,9 @@ public class WGLabel implements Renderable, GuiEventListener, NarratableEntry {
     }
 
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
+    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
         if (visible) {
-            font.drawShadow(poseStack, component, startX, startY, color);
+            guiGraphics.drawString(font, component, startX, startY, color);
         }
     }
 

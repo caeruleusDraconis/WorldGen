@@ -11,6 +11,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +27,7 @@ public class WGLightChunkGetter implements LightChunkGetter {
 
     @Nullable
     @Override
-    public BlockGetter getChunkForLighting(int x, int z) {
+    public LightChunk getChunkForLighting(int x, int z) {
         return level.getChunk(x, z, ChunkStatus.FEATURES);
     }
 

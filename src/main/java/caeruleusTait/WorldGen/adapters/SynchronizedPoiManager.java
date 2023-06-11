@@ -208,8 +208,8 @@ public class SynchronizedPoiManager extends PoiManager {
     }
 
     @Override
-    public synchronized void checkConsistencyWithBlocks(ChunkPos chunkPos, LevelChunkSection levelChunkSection) {
-        real.checkConsistencyWithBlocks(chunkPos, levelChunkSection);
+    public synchronized void checkConsistencyWithBlocks(SectionPos sectionPos, LevelChunkSection levelChunkSection) {
+        real.checkConsistencyWithBlocks(sectionPos, levelChunkSection);
     }
 
     @Override

@@ -36,3 +36,6 @@ run/
 build.gradle
 gradle.properties
 WorldGen.java
+mods.toml
+fabric.mod.json
+pack.mcmeta

@@ -3,6 +3,7 @@
 
 package caeruleusTait.WorldGen.worker.storage;
 
+import caeruleusTait.WorldGen.WorldGen;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
@@ -39,17 +40,18 @@ public class WGLightEngineData {
     }
 
     public void loadLightEngineData(LevelLightEngine engine) {
+        engine.retainData(chunkPos, true);
         for (int i = min; i < max; ++i) {
             final SectionPos sPos = SectionPos.of(chunkPos, i);
             final DataLayer sky = skyLayers[i - min];
             final DataLayer block = blockLayers[i - min];
 
             if (sky != null && !sky.isEmpty()) {
-                engine.queueSectionData(LightLayer.SKY, sPos, sky, true);
+                engine.queueSectionData(LightLayer.SKY, sPos, sky);
             }
 
             if (block != null && !block.isEmpty()) {
-                engine.queueSectionData(LightLayer.BLOCK, sPos, block, true);
+                engine.queueSectionData(LightLayer.BLOCK, sPos, block);
             }
         }
     }

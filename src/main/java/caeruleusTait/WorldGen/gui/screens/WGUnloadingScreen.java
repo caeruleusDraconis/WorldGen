@@ -5,9 +5,10 @@ package caeruleusTait.WorldGen.gui.screens;
 
 import caeruleusTait.WorldGen.worker.WGGenerator;
 import caeruleusTait.WorldGen.worker.WGMain;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 public class WGUnloadingScreen extends Screen {
     private final WGGenerator generator;
@@ -28,7 +29,7 @@ public class WGUnloadingScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
+    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
         if(this.isComplete)
         {
             this.minecraft.setScreen(nextScreen);
@@ -39,9 +40,9 @@ public class WGUnloadingScreen extends Screen {
         int diff = Math.max(0, initial-curr);
         float proc = ((float) diff / (float) initial) * 100.f;
 
-        this.renderDirtBackground(poseStack);
-        drawCenteredString(poseStack, font, title, width / 2, 15, 0xFFFFFF);
-        drawCenteredString(poseStack, font, String.format("%.1f %%   [%d/%d]", proc, diff, initial), width / 2, 70, 0xFFFFFF);
-        super.render(poseStack, i, j, f);
+        this.renderDirtBackground(guiGraphics);
+        guiGraphics.drawCenteredString(font, title, width / 2, 15, 0xFFFFFF);
+        guiGraphics.drawCenteredString(font, String.format("%.1f %%   [%d/%d]", proc, diff, initial), width / 2, 70, 0xFFFFFF);
+        super.render(guiGraphics, i, j, f);
     }
 }

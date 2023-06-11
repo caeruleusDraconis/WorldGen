@@ -3,7 +3,6 @@
 
 package caeruleusTait.WorldGen.adapters;
 
-import caeruleusTait.WorldGen.WorldGen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
@@ -12,8 +11,10 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.DataLayer;
+import net.minecraft.world.level.chunk.LightChunk;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
+import net.minecraft.world.level.lighting.LayerLightSectionStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +24,7 @@ public class ThreadedLevelLightEngineAdapter extends ThreadedLevelLightEngine {
         super(new LightChunkGetter() {
             @Nullable
             @Override
-            public BlockGetter getChunkForLighting(int i, int j) {
+            public LightChunk getChunkForLighting(int i, int j) {
                 return null;
             }
 
@@ -32,11 +33,6 @@ public class ThreadedLevelLightEngineAdapter extends ThreadedLevelLightEngine {
                 return null;
             }
         }, null, false, null, null);
-    }
-
-    @Override
-    public CompletableFuture<ChunkAccess> retainData(ChunkAccess chunkAccess) {
-        return CompletableFuture.completedFuture(chunkAccess);
     }
 
     //  =================
@@ -49,18 +45,13 @@ public class ThreadedLevelLightEngineAdapter extends ThreadedLevelLightEngine {
     }
 
     @Override
-    public int runUpdates(int i, boolean bl, boolean bl2) {
-        throw new RuntimeException("NyI");
-    }
-
-    @Override
-    public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
+    public int runLightUpdates() {
         throw new RuntimeException("NyI");
     }
 
     @Override
     public void checkBlock(BlockPos blockPos) {
-        WorldGen.currentLevel.getLightEngine().checkBlock(blockPos);
+        throw new RuntimeException("NyI");
     }
 
     @Override
@@ -74,17 +65,27 @@ public class ThreadedLevelLightEngineAdapter extends ThreadedLevelLightEngine {
     }
 
     @Override
-    public void enableLightSources(ChunkPos chunkPos, boolean bl) {
+    public void propagateLightSources(ChunkPos chunkPos) {
         throw new RuntimeException("NyI");
     }
 
     @Override
-    public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer, boolean bl) {
+    public void setLightEnabled(ChunkPos chunkPos, boolean bl) {
+        throw new RuntimeException("NyI");
+    }
+
+    @Override
+    public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer) {
         throw new RuntimeException("NyI");
     }
 
     @Override
     public void retainData(ChunkPos chunkPos, boolean bl) {
+        throw new RuntimeException("NyI");
+    }
+
+    @Override
+    public CompletableFuture<ChunkAccess> initializeLight(ChunkAccess chunkAccess, boolean bl) {
         throw new RuntimeException("NyI");
     }
 
@@ -95,11 +96,6 @@ public class ThreadedLevelLightEngineAdapter extends ThreadedLevelLightEngine {
 
     @Override
     public void tryScheduleUpdate() {
-        throw new RuntimeException("NyI");
-    }
-
-    @Override
-    public void setTaskPerBatch(int i) {
         throw new RuntimeException("NyI");
     }
 
@@ -119,7 +115,17 @@ public class ThreadedLevelLightEngineAdapter extends ThreadedLevelLightEngine {
     }
 
     @Override
+    public LayerLightSectionStorage.SectionType getDebugSectionType(LightLayer lightLayer, SectionPos sectionPos) {
+        throw new RuntimeException("NyI");
+    }
+
+    @Override
     public int getRawBrightness(BlockPos blockPos, int i) {
+        throw new RuntimeException("NyI");
+    }
+
+    @Override
+    public boolean lightOnInSection(SectionPos sectionPos) {
         throw new RuntimeException("NyI");
     }
 
