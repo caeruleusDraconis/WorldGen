@@ -49,7 +49,8 @@ public class MultiSelectScreen<T> extends Screen {
 
     @Override
     protected void init() {
-        minecraft.keyboardHandler.setSendRepeatsToGui(true);
+        // TODO: Is this still required?
+        // minecraft.keyboardHandler.setSendRepeatsToGui(true);
 
         final GUIFactory gf = new GUIFactory(this);
 
@@ -103,10 +104,6 @@ public class MultiSelectScreen<T> extends Screen {
             super(MultiSelectScreen.this.minecraft, MultiSelectScreen.this.width, MultiSelectScreen.this.height, 40, MultiSelectScreen.this.height - 37, 16);
 
             entryList.forEach(this::addEntry);
-        }
-
-        protected boolean isFocused() {
-            return MultiSelectScreen.this.getFocused() == this;
         }
 
         public void setSelected(@Nullable TheEntry entry) {

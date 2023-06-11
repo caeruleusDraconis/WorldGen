@@ -115,7 +115,10 @@ public final class GUIFactory {
      */
     public Button button(int vPos, Component label, Button.OnPress onPress, int hPos, int hMax) {
         int buttonSection = ((LINE_WIDTH - ((hMax-1) * LINE_HSPACE)) / hMax);
-        return new Button(centerHorizontal - LINE_CENTER_HORIZONTAL + (hPos * (buttonSection + LINE_HSPACE)), vPos, buttonSection, LINE_HEIGHT, label, onPress);
+        return Button.builder(label, onPress)
+                .pos(centerHorizontal - LINE_CENTER_HORIZONTAL + (hPos * (buttonSection + LINE_HSPACE)), vPos)
+                .size(buttonSection, LINE_HEIGHT)
+                .build();
     }
 
 

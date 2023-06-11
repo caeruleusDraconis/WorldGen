@@ -1,9 +1,12 @@
 #!/bin/bash
 
 FILES=(
-  'build.gradle'
-  'gradle.properties'
-  'src/main/java/caeruleusTait/WorldGen/WorldGen.java'
+  'c|build.gradle'
+  'c|gradle.properties'
+  'c|src/main/java/caeruleusTait/WorldGen/WorldGen.java'
+  'o|src/main/resources/META-INF/mods.toml'
+  'o|src/main/resources/fabric.mod.json'
+  'o|src/main/resources/pack.mcmeta'
 )
 
 
@@ -55,8 +58,11 @@ case $LINK in
 esac
 
 for f in "${FILES[@]}"; do
+  flags="${f//|*/}"
+  f="${f//*|/}"
   rm -f "$f"
   dest="$PWD/$f.$ENDING"
-  [ ! -e "$dest" ] && touch "$dest"
+  [[ ! -e "$dest" && "$flags" == *"o"* ]] && continue
+  [[ ! -e "$dest" && "$flags" == *"c"* ]] && touch "$dest"
   $CP "$dest" "$f"
 done

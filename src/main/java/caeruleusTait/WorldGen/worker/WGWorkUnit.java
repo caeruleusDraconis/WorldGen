@@ -81,7 +81,13 @@ public abstract class WGWorkUnit {
             inProgress = true;
         }
 
-        boolean result = work();
+        boolean result;
+        try {
+            result = work();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            result = false;
+        }
         inProgress = false;
 
 

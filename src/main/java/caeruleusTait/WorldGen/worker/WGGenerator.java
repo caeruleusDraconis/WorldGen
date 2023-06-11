@@ -3,13 +3,6 @@
 
 package caeruleusTait.WorldGen.worker;
 
-import caeruleusTait.WorldGen.mixin.ChunkMapAccessor;
-import caeruleusTait.WorldGen.util.SimpleClosable;
-import caeruleusTait.WorldGen.worker.storage.WGChunkHolder;
-import caeruleusTait.WorldGen.worker.storage.WGChunkIO;
-import caeruleusTait.WorldGen.worker.storage.WGChunkStorage;
-import com.mojang.datafixers.util.Either;
-import it.unimi.dsi.fastutil.longs.*;
 import caeruleusTait.WorldGen.WorldGen;
 import caeruleusTait.WorldGen.adapters.ThreadedLevelLightEngineAdapter;
 import caeruleusTait.WorldGen.config.WGConfigState;
@@ -18,9 +11,9 @@ import caeruleusTait.WorldGen.util.SimpleClosable;
 import caeruleusTait.WorldGen.worker.storage.WGChunkHolder;
 import caeruleusTait.WorldGen.worker.storage.WGChunkIO;
 import caeruleusTait.WorldGen.worker.storage.WGChunkStorage;
-import net.minecraft.core.SectionPos;
-import caeruleusTait.WorldGen.WorldGen;
-import caeruleusTait.WorldGen.config.WGConfigState;
+import com.mojang.datafixers.util.Either;
+import it.unimi.dsi.fastutil.longs.*;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
@@ -38,8 +31,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
-import static net.minecraft.core.Registry.BIOME_REGISTRY;
 
 public class WGGenerator {
 
@@ -441,7 +432,7 @@ public class WGGenerator {
                     chunkPos,
                     UpgradeData.EMPTY,
                     level,
-                    level.registryAccess().registryOrThrow(BIOME_REGISTRY),
+                    level.registryAccess().registryOrThrow(Registries.BIOME),
                     null
             );
         }
@@ -452,7 +443,7 @@ public class WGGenerator {
                     chunkPos,
                     UpgradeData.EMPTY,
                     level,
-                    level.registryAccess().registryOrThrow(BIOME_REGISTRY),
+                    level.registryAccess().registryOrThrow(Registries.BIOME),
                     null
             );
         }

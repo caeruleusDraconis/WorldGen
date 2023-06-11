@@ -6,35 +6,39 @@ package caeruleusTait.WorldGen.gui.screens;
 import caeruleusTait.WorldGen.gui.GUIFactory;
 import caeruleusTait.WorldGen.gui.MultiSelectScreen;
 import caeruleusTait.WorldGen.gui.widgets.WGLabel;
+import caeruleusTait.WorldGen.util.Utils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import caeruleusTait.WorldGen.WorldGen;
 import caeruleusTait.WorldGen.config.PregenSizeMode;
 import caeruleusTait.WorldGen.config.WGConfigState;
+import caeruleusTait.WorldGen.gui.GUIFactory;
+import caeruleusTait.WorldGen.gui.MultiSelectScreen;
+import caeruleusTait.WorldGen.gui.widgets.WGLabel;
 import caeruleusTait.WorldGen.worker.WGChunkGenWorkHost;
 import caeruleusTait.WorldGen.worker.WGMain;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.RegistryLayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 
 public class WGConfigScreen extends Screen {
@@ -294,20 +298,20 @@ public class WGConfigScreen extends Screen {
 
     private void updateBoxStatus() {
         boxRadius.setVisible(false);
-        boxRadius.setFocus(false);
+        boxRadius.setFocused(false);
         lRadius.setVisible(false);
 
         boxHSize.setVisible(false);
         boxVSize.setVisible(false);
-        boxHSize.setFocus(false);
-        boxVSize.setFocus(false);
+        boxHSize.setFocused(false);
+        boxVSize.setFocused(false);
         lHSize.setVisible(false);
         lVSize.setVisible(false);
 
         boxCenterX.setVisible(false);
         boxCenterZ.setVisible(false);
-        boxCenterX.setFocus(false);
-        boxCenterZ.setFocus(false);
+        boxCenterX.setFocused(false);
+        boxCenterZ.setFocused(false);
         lCenterX.setVisible(false);
         lCenterZ.setVisible(false);
         btnCenterPicker.visible = false;
@@ -316,10 +320,10 @@ public class WGConfigScreen extends Screen {
         boxXMax.setVisible(false);
         boxZMin.setVisible(false);
         boxZMax.setVisible(false);
-        boxXMin.setFocus(false);
-        boxXMax.setFocus(false);
-        boxZMin.setFocus(false);
-        boxZMax.setFocus(false);
+        boxXMin.setFocused(false);
+        boxXMax.setFocused(false);
+        boxZMin.setFocused(false);
+        boxZMax.setFocused(false);
         lXMin.setVisible(false);
         lXMax.setVisible(false);
         lZMin.setVisible(false);
@@ -485,12 +489,14 @@ public class WGConfigScreen extends Screen {
         assert this.minecraft != null;
 
         List<ResourceKey<Level>> dimensionList = wgMain
-                .worldGenSettings()
-                .dimensions()
+                .worldStem()
+                .registries()
+                .getLayer(RegistryLayer.DIMENSIONS)
+                .registryOrThrow(Registries.LEVEL_STEM)
                 .entrySet()
                 .stream()
                 .map(Map.Entry::getKey)
-                .map(WorldGenSettings::levelStemToLevel)
+                .map(Utils::levelStemToLevel)
                 .toList();
 
         final MultiSelectScreen<ResourceKey<Level>> screen = new MultiSelectScreen<>(

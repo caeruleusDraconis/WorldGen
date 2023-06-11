@@ -3,20 +3,23 @@
 
 package caeruleusTait.WorldGen.worker;
 
+import caeruleusTait.WorldGen.WorldGen;
 import caeruleusTait.WorldGen.adapters.SynchronizedPoiManager;
 import caeruleusTait.WorldGen.mixin.PersistentEntitySectionManagerAccessor;
 import caeruleusTait.WorldGen.mixin.ServerLevelMixinAccessor;
 import caeruleusTait.WorldGen.util.SimpleClosable;
+import caeruleusTait.WorldGen.util.Utils;
 import caeruleusTait.WorldGen.worker.storage.WGChunkHolder;
 import caeruleusTait.WorldGen.worker.storage.WGLightChunkGetter;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import caeruleusTait.WorldGen.WorldGen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -84,7 +87,7 @@ public class WGLevel extends ServerLevel {
                 genLevelStem(main, dimension),
                 main.minecraftServer().chunkProgressListener(),
                 isDebug,
-                BiomeManager.obfuscateSeed(main.worldGenSettings().seed()), // MinecraftServer.createLevels
+                BiomeManager.obfuscateSeed(main.worldData().worldGenOptions().seed()), // MinecraftServer.createLevels
                 customSpawners,
                 tickTime
         );
@@ -111,9 +114,13 @@ public class WGLevel extends ServerLevel {
     }
 
     public static Holder<DimensionType> dimensionTypeHolder(WGMain _wgMain, ResourceKey<Level> _dimension) {
-        ResourceKey<LevelStem> dimensionStemKey = WorldGenSettings.levelToLevelStem(_dimension);
-        LevelStem dimensionStem = _wgMain.worldGenSettings().dimensions().get(dimensionStemKey);
-        return dimensionStem.typeHolder();
+        ResourceKey<LevelStem> dimensionStemKey = Utils.levelToLevelStem(_dimension);
+        LevelStem dimensionStem = _wgMain.worldStem()
+                .registries()
+                .getLayer(RegistryLayer.DIMENSIONS)
+                .registryOrThrow(Registries.LEVEL_STEM)
+                .get(dimensionStemKey);
+        return dimensionStem.type();
     }
 
     public static ServerLevelData genServerLevelData(WGMain main, ResourceKey<Level> dimensionKey) {
@@ -125,14 +132,22 @@ public class WGLevel extends ServerLevel {
     }
 
     public static ChunkGenerator genChunkGenerator(WGMain main, ResourceKey<Level> dimensionKey) {
-        ResourceKey<LevelStem> dimensionStemKey = WorldGenSettings.levelToLevelStem(dimensionKey);
-        LevelStem dimensionStem = main.worldGenSettings().dimensions().get(dimensionStemKey);
+        ResourceKey<LevelStem> dimensionStemKey = Utils.levelToLevelStem(dimensionKey);
+        LevelStem dimensionStem = main.worldStem()
+                .registries()
+                .getLayer(RegistryLayer.DIMENSIONS)
+                .registryOrThrow(Registries.LEVEL_STEM)
+                .get(dimensionStemKey);
         return dimensionStem.generator();
     }
 
     public static LevelStem genLevelStem(WGMain main, ResourceKey<Level> dimensionKey) {
-        ResourceKey<LevelStem> dimensionStemKey = WorldGenSettings.levelToLevelStem(dimensionKey);
-        return main.worldGenSettings().dimensions().get(dimensionStemKey);
+        ResourceKey<LevelStem> dimensionStemKey = Utils.levelToLevelStem(dimensionKey);
+        return main.worldStem()
+                .registries()
+                .getLayer(RegistryLayer.DIMENSIONS)
+                .registryOrThrow(Registries.LEVEL_STEM)
+                .get(dimensionStemKey);
     }
 
     public void safeEntitiesInChunk(long posIDX) {

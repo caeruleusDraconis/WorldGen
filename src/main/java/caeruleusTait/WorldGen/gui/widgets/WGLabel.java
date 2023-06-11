@@ -5,13 +5,13 @@ package caeruleusTait.WorldGen.gui.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 
-public class WGLabel implements Widget, GuiEventListener, NarratableEntry {
+public class WGLabel implements Renderable, GuiEventListener, NarratableEntry {
     private Font font;
     private Component component;
     private int color;
@@ -26,6 +26,7 @@ public class WGLabel implements Widget, GuiEventListener, NarratableEntry {
     private int startY;
 
     boolean visible = true;
+    boolean focused = false;
     
     public WGLabel(Font _font, int _x, int _y, int _length, int _height, TextAlignment _alignment, Component _component, int _color) {
         font = _font;
@@ -88,6 +89,16 @@ public class WGLabel implements Widget, GuiEventListener, NarratableEntry {
 
     @Override
     public void updateNarration(NarrationElementOutput narrationElementOutput) {
+    }
+
+    @Override
+    public void setFocused(boolean bl) {
+        focused = bl;
+    }
+
+    @Override
+    public boolean isFocused() {
+        return focused;
     }
 
     public enum TextAlignment {

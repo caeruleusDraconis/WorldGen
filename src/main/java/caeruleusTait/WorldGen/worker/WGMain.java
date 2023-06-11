@@ -3,15 +3,19 @@
 
 package caeruleusTait.WorldGen.worker;
 
+import caeruleusTait.WorldGen.WorldGen;
+import caeruleusTait.WorldGen.config.WGConfigState;
 import caeruleusTait.WorldGen.gui.screens.WGLoadingScreen;
+import caeruleusTait.WorldGen.mixin.WorldOpenFlowsAccessor;
 import caeruleusTait.WorldGen.util.WGChunkListGenerator;
 import caeruleusTait.WorldGen.worker.storage.WGChunkHolder;
 import com.mojang.datafixers.DataFixer;
-import caeruleusTait.WorldGen.WorldGen;
-import caeruleusTait.WorldGen.config.WGConfigState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.packs.PackType;
@@ -53,6 +57,7 @@ public class WGMain {
     private final AtomicInteger genCount;
     private final WGConfigState cfg;
 
+    private boolean aborted;
     private WGChunkGenWorkHost activeWorkHost;
 
     public WGMain(Minecraft _minecraft, String _levelID) throws Exception {
@@ -65,11 +70,11 @@ public class WGMain {
         levelStorageAccess = levelSource().createAccess(levelID);
         // See Minecraft.createPackRepository() --> No static invoker for hot reloads [UPGRADE_WATCH]
         packRepository = new PackRepository(
-                PackType.SERVER_DATA,
                 new ServerPacksSource(),
-                new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
+                new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), PackType.SERVER_DATA, PackSource.WORLD)
         );
-        worldStem = minecraft.createWorldOpenFlows().loadWorldStem(levelStorageAccess, true);
+        final WorldOpenFlows openFlows = minecraft.createWorldOpenFlows();
+        worldStem = ((WorldOpenFlowsAccessor) openFlows).callLoadWorldStem(levelStorageAccess, false, packRepository);
 
         /*
         // Do NOT forget this call!
@@ -89,6 +94,7 @@ public class WGMain {
         level = new WGLevel(this, cfg.dimension, maxPossibleThreads);
         executorServices.clear();
         genCount.set(0);
+        WorldGen.onFakeServerStart();
     }
 
     public WGLevel getWGLevel() {
@@ -99,6 +105,7 @@ public class WGMain {
         return genCount.get();
     }
 
+    public boolean isAborted() { return aborted; }
 
     public void generateChunk(ChunkPos pos) {
         try {
@@ -117,6 +124,7 @@ public class WGMain {
         activeWorkHost = new WGChunkGenWorkHost(this, cfg.maxThreads);
         List<WGChunkWorkUnit> workList = WGChunkListGenerator.generateChunkWorkList(activeWorkHost, WGConfigState.BLOCK_SIZE, cfg.maxThreads, start, end, filter);
 
+        aborted = false;
 
         int totalCount = 0;
 
@@ -136,12 +144,25 @@ public class WGMain {
 
         this.minecraft.setScreen(loadingScreen);
 
-        activeWorkHost.submitWork(workList);
+        try {
+            activeWorkHost.submitWork(workList);
+        } catch(RuntimeException runtimeException) {
+            runtimeException.printStackTrace();
+            this.minecraft.setScreen(new AlertScreen(
+                    this::abortWork,
+                    Component.literal("Error"),
+                    Component.literal(runtimeException.getMessage())
+            ));
+        }
     }
 
     public void abortWork() {
+        aborted = true;
         if(activeWorkHost != null) {
-            activeWorkHost.abortWork();
+            if(!activeWorkHost.isAborted()) {
+                // We only want to abort and join the worker threads if this has not already been done...
+                activeWorkHost.abortWork();
+            }
             activeWorkHost = null;
         }
     }
@@ -160,6 +181,7 @@ public class WGMain {
         });
         executorServices.clear();
 
+        WorldGen.onFakeServerStop();
         if (level != null) {
             try {
                 level.close();
@@ -184,10 +206,6 @@ public class WGMain {
         }
     }
 
-    public RegistryAccess registryAccess() {
-        return worldStem.registryAccess();
-    }
-
     public LevelStorageSource.LevelStorageAccess levelStorageAccess() {
         return levelStorageAccess;
     }
@@ -199,10 +217,6 @@ public class WGMain {
 
     public ResourceManager resourceManager() {
         return worldStem.resourceManager();
-    }
-
-    public WorldGenSettings worldGenSettings() {
-        return worldData().worldGenSettings();
     }
 
     public LevelStorageSource levelSource() {

@@ -3,8 +3,8 @@
 
 package caeruleusTait.WorldGen.adapters;
 
-import com.mojang.datafixers.util.Pair;
 import caeruleusTait.WorldGen.mixin.SectionStorageAccessor;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;

@@ -3,16 +3,18 @@
 
 package caeruleusTait.WorldGen.gui.screens;
 
+import caeruleusTait.WorldGen.config.WGConfigState;
 import caeruleusTait.WorldGen.gui.GUIFactory;
 import caeruleusTait.WorldGen.gui.MultiSelectScreen;
 import caeruleusTait.WorldGen.gui.widgets.WGCheckbox;
 import caeruleusTait.WorldGen.gui.widgets.WGLabel;
 import com.mojang.blaze3d.vertex.PoseStack;
-import caeruleusTait.WorldGen.config.WGConfigState;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -110,7 +112,7 @@ public class WGAdvancedConfigScreen extends Screen {
     }
 
     private static String cs2str(ChunkStatus cs) {
-        return Registry.CHUNK_STATUS.getKey(cs).toString();
+        return BuiltInRegistries.CHUNK_STATUS.getKey(cs).toString();
     }
 
     private void onCheckboxToggle(WGCheckbox cb) {
@@ -134,7 +136,7 @@ public class WGAdvancedConfigScreen extends Screen {
         if (cs == null) {
             return "<NO CHANGE>";
         }
-        return Registry.CHUNK_STATUS.getKey(cs).getPath();
+        return BuiltInRegistries.CHUNK_STATUS.getKey(cs).getPath();
     }
 
     private void onMaxStatusSelector(Button btn) {
@@ -182,11 +184,11 @@ public class WGAdvancedConfigScreen extends Screen {
         validateConfig();
 
         if (chEnableThreading.selected()) {
-            boxMaxThreads.setFocus(true);
+            boxMaxThreads.setFocused(true);
             boxMaxThreads.setEditable(true);
             lMaxThreads.setColor(0xFFFFFF);
         } else {
-            boxMaxThreads.setFocus(false);
+            boxMaxThreads.setFocused(false);
             boxMaxThreads.setEditable(false);
             lMaxThreads.setColor(0x707070);
         }

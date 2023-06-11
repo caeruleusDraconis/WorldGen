@@ -20,7 +20,8 @@
   "client": [
     "ScreenAccessor",
     "SelectWorldScreenMixin",
-    "WorldListEntryAccessor"
+    "WorldListEntryAccessor",
+    "WorldOpenFlowsAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

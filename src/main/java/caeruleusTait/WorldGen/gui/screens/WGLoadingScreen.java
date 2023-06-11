@@ -3,25 +3,26 @@
 
 package caeruleusTait.WorldGen.gui.screens;
 
+import caeruleusTait.WorldGen.config.WGConfigState;
 import caeruleusTait.WorldGen.gui.GUIFactory;
-import com.mojang.blaze3d.vertex.PoseStack;
+import caeruleusTait.WorldGen.worker.WGChunkProgressListener;
+import caeruleusTait.WorldGen.worker.WGMain;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import caeruleusTait.WorldGen.config.WGConfigState;
-import caeruleusTait.WorldGen.gui.GUIFactory;
-import caeruleusTait.WorldGen.worker.WGChunkProgressListener;
-import caeruleusTait.WorldGen.worker.WGMain;
-import caeruleusTait.WorldGen.config.WGConfigState;
-import caeruleusTait.WorldGen.worker.WGChunkProgressListener;
-import caeruleusTait.WorldGen.worker.WGMain;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -53,41 +54,53 @@ public class WGLoadingScreen extends Screen {
     private final WGChunkProgressListener progressListener;
     private long lastNarration = -1L;
 
+    private NativeImage progressImg;
+    private DynamicTexture progressTexture;
+
+    private long frameCounter = 0;
+
     // Original minecraft colors
     private static final Object2IntMap<ChunkStatus> COLORS = Util.make(new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> {
-        object2IntOpenHashMap.defaultReturnValue(0);
-        object2IntOpenHashMap.put(ChunkStatus.EMPTY, 0x545454);
-        object2IntOpenHashMap.put(ChunkStatus.STRUCTURE_STARTS, 0x999999);
-        object2IntOpenHashMap.put(ChunkStatus.STRUCTURE_REFERENCES, 0x5F6191);
-        object2IntOpenHashMap.put(ChunkStatus.BIOMES, 0x80B252);
-        object2IntOpenHashMap.put(ChunkStatus.NOISE, 0xD1D1D1);
-        object2IntOpenHashMap.put(ChunkStatus.SURFACE, 0x726809);
-        object2IntOpenHashMap.put(ChunkStatus.CARVERS, 0x6D665C);
-        object2IntOpenHashMap.put(ChunkStatus.LIQUID_CARVERS, 0x303572);
-        object2IntOpenHashMap.put(ChunkStatus.FEATURES, 0x21C600);
-        object2IntOpenHashMap.put(ChunkStatus.LIGHT, 0xCCCCCC);
-        object2IntOpenHashMap.put(ChunkStatus.SPAWN, 0xF26060);
-        object2IntOpenHashMap.put(ChunkStatus.HEIGHTMAPS, 0xEEEEEE);
-        object2IntOpenHashMap.put(ChunkStatus.FULL, 0xFFFFFF);
+        object2IntOpenHashMap.defaultReturnValue(nativeColor(0x000000));
+        object2IntOpenHashMap.put(ChunkStatus.EMPTY, nativeColor(0x545454));
+        object2IntOpenHashMap.put(ChunkStatus.STRUCTURE_STARTS, nativeColor(0x999999));
+        object2IntOpenHashMap.put(ChunkStatus.STRUCTURE_REFERENCES, nativeColor(0x5F6191));
+        object2IntOpenHashMap.put(ChunkStatus.BIOMES, nativeColor(0x80B252));
+        object2IntOpenHashMap.put(ChunkStatus.NOISE, nativeColor(0xD1D1D1));
+        object2IntOpenHashMap.put(ChunkStatus.SURFACE, nativeColor(0x726809));
+        object2IntOpenHashMap.put(ChunkStatus.CARVERS, nativeColor(0x6D665C));
+        object2IntOpenHashMap.put(ChunkStatus.LIQUID_CARVERS, nativeColor(0x303572));
+        object2IntOpenHashMap.put(ChunkStatus.FEATURES, nativeColor(0x21C600));
+        object2IntOpenHashMap.put(ChunkStatus.LIGHT, nativeColor(0xCCCCCC));
+        object2IntOpenHashMap.put(ChunkStatus.SPAWN, nativeColor(0xF26060));
+        object2IntOpenHashMap.put(ChunkStatus.HEIGHTMAPS, nativeColor(0xEEEEEE));
+        object2IntOpenHashMap.put(ChunkStatus.FULL, nativeColor(0xFFFFFF));
     });
 
     //Slighty faded colors
     private static final Object2IntMap<ChunkStatus> COLORS_UNLOADED = Util.make(new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> {
-        object2IntOpenHashMap.defaultReturnValue(0);
-        object2IntOpenHashMap.put(ChunkStatus.EMPTY, 0x343434);
-        object2IntOpenHashMap.put(ChunkStatus.STRUCTURE_STARTS, 0x696969);
-        object2IntOpenHashMap.put(ChunkStatus.STRUCTURE_REFERENCES, 0x3F4161);
-        object2IntOpenHashMap.put(ChunkStatus.BIOMES, 0x809252);
-        object2IntOpenHashMap.put(ChunkStatus.NOISE, 0xA1A1A1);
-        object2IntOpenHashMap.put(ChunkStatus.SURFACE, 0x423409);
-        object2IntOpenHashMap.put(ChunkStatus.CARVERS, 0x3D362C);
-        object2IntOpenHashMap.put(ChunkStatus.LIQUID_CARVERS, 0x101542);
-        object2IntOpenHashMap.put(ChunkStatus.FEATURES, 0x215600);
-        object2IntOpenHashMap.put(ChunkStatus.LIGHT, 0x8C8C8C);
-        object2IntOpenHashMap.put(ChunkStatus.SPAWN, 0xB26060);
-        object2IntOpenHashMap.put(ChunkStatus.HEIGHTMAPS, 0xAEAEAE);
-        object2IntOpenHashMap.put(ChunkStatus.FULL, 0xBFBFBF);
+        object2IntOpenHashMap.defaultReturnValue(nativeColor(0x000000));
+        object2IntOpenHashMap.put(ChunkStatus.EMPTY, nativeColor(0x343434));
+        object2IntOpenHashMap.put(ChunkStatus.STRUCTURE_STARTS, nativeColor(0x696969));
+        object2IntOpenHashMap.put(ChunkStatus.STRUCTURE_REFERENCES, nativeColor(0x3F4161));
+        object2IntOpenHashMap.put(ChunkStatus.BIOMES, nativeColor(0x809252));
+        object2IntOpenHashMap.put(ChunkStatus.NOISE, nativeColor(0xA1A1A1));
+        object2IntOpenHashMap.put(ChunkStatus.SURFACE, nativeColor(0x423409));
+        object2IntOpenHashMap.put(ChunkStatus.CARVERS, nativeColor(0x3D362C));
+        object2IntOpenHashMap.put(ChunkStatus.LIQUID_CARVERS, nativeColor(0x101542));
+        object2IntOpenHashMap.put(ChunkStatus.FEATURES, nativeColor(0x215600));
+        object2IntOpenHashMap.put(ChunkStatus.LIGHT, nativeColor(0x8C8C8C));
+        object2IntOpenHashMap.put(ChunkStatus.SPAWN, nativeColor(0xB26060));
+        object2IntOpenHashMap.put(ChunkStatus.HEIGHTMAPS, nativeColor(0xAEAEAE));
+        object2IntOpenHashMap.put(ChunkStatus.FULL, nativeColor(0xBFBFBF));
     });
+
+    private static int nativeColor(int orig) {
+        final int R = (orig >> 16) & 0xFF;
+        final int G = (orig >> 8) & 0xFF;
+        final int B = (orig >> 0) & 0xFF;
+        return (R << 0) | (G << 8) | (B << 16) | (0xFF << 24);
+    }
 
     public WGLoadingScreen(Screen _lastScreen, Screen selectWorldScreen, WGChunkProgressListener progressListener, WGMain main, int chunkTotal) {
         super(Component.translatable("world-gen.loading.title"));
@@ -101,6 +114,8 @@ public class WGLoadingScreen extends Screen {
         this.lastChunkTime = -1;
         this.lastChunkCount = 0;
         this.cfg = WGConfigState.get();
+        this.progressImg = new NativeImage(NativeImage.Format.RGBA, progressListener.getDiameter(), progressListener.getDiameter(), true);
+        this.progressTexture = new DynamicTexture(progressImg);
     }
 
     @Override
@@ -142,7 +157,27 @@ public class WGLoadingScreen extends Screen {
     public void onClose() {
         assert this.minecraft != null;
 
-        this.minecraft.setScreen(new WGUnloadingScreen(main));
+        WGUnloadingScreen unload;
+        Screen nextScreen;
+
+        if(this.main.isAborted()) {
+            nextScreen = new AlertScreen(
+                    () -> { minecraft.setScreen(lastScreen); },
+                    Component.literal("Error"),
+                    Component.literal("An error occurred during WorldGen!\n\nPlease check the Minecraft logs and submit the stack trace of the error on GitHub."));
+        }
+        else if (aborted)
+        {
+            nextScreen = lastScreen;
+        }
+        else
+        {
+            nextScreen = selectWorldScreen;
+        }
+
+        unload = new WGUnloadingScreen(main, nextScreen);
+
+        this.minecraft.setScreen(unload);
         CompletableFuture.runAsync(
                 () -> {
                     try {
@@ -151,17 +186,12 @@ public class WGLoadingScreen extends Screen {
                         cause.printStackTrace();
                     }
 
-                    if(aborted) {
-                        // We aborted so we want to go back to our screen, init first
-                        lastScreen.init(this.minecraft, this.width, this.height);
-                        minecraft.setScreen(lastScreen);
-                    } else {
-                        // We successfully did it! Time to go back to the select world screen, init first
-                        selectWorldScreen.init(this.minecraft, this.width, this.height);
-                        minecraft.setScreen(selectWorldScreen);
-                    }
+                    unload.signalComplete();
                 }
         );
+
+        progressImg.close();
+        progressTexture.close();
     }
 
     @Override
@@ -188,7 +218,7 @@ public class WGLoadingScreen extends Screen {
             this.triggerImmediateNarration(true);
             this.onClose();
             return;
-        } else if(this.getProgress() >= 100) {
+        } else if(this.getProgress() >= 100 || this.main.isAborted()) {
             // We are done, but render one extra time
             this.done = true;
         }
@@ -229,82 +259,77 @@ public class WGLoadingScreen extends Screen {
         WGLoadingScreen.drawCenteredString(poseStack, this.font, String.format("%.1f CPS   [%d/%d]", cps, this.main.getGenCount(), chunkTotal), xCenter, top, 0xFFFFFF);
         top += 5 + this.font.lineHeight;
 
-        int verticalSpace = this.btnReturn.y - 10 - top;
+        int verticalSpace = this.btnReturn.getY() - 10 - top;
         int vRadius = verticalSpace / 2;
         int boxVCenter = top + vRadius;
         int radius = Math.min(vRadius, xCenter);
 
         if (cfg.enableProgress) {
-            WGLoadingScreen.renderChunks(
+            renderChunks(
                     poseStack,
                     this.progressListener,
-                    xCenter,
-                    boxVCenter,
                     xCenter - radius,
                     xCenter + radius,
                     boxVCenter - radius,
-                    boxVCenter + radius,
-                    1,
-                    0
+                    boxVCenter + radius
             );
         }
 
         super.render(poseStack, i, j, f);
     }
 
-    public static void renderChunks(PoseStack poseStack, WGChunkProgressListener storingChunkProgressListener, int xCenter, int yCenter, int xMin, int xMax, int yMin, int yMax, int chunkDrawSize, int spacing) {
-        int blockSize = chunkDrawSize + spacing;
-        int fullDia = storingChunkProgressListener.getFullDiameter();
-        int fullChunkWidth = fullDia * blockSize - spacing;
-        int diameter = storingChunkProgressListener.getDiameter();
-        int fullDisplayWidth = diameter * blockSize - spacing;
-        int left = xCenter - fullDisplayWidth / 2;
-        int top = yCenter - fullDisplayWidth / 2;
-        int chunkRadius = fullChunkWidth / 2 + 1;
-        int colorBackground = 0xFF222222;
+    public void renderChunks(PoseStack poseStack, WGChunkProgressListener chunkProgressListener, int xMin, int xMax, int yMin, int yMax) {
+        int diameter = chunkProgressListener.getDiameter();
         int colorBorder = 0xFF666666;
-        int colorOutline = 0xFF0011FF;
-
-        // Get synchronized versions for this update in bulk so it does not have to be done for each chunk,
-        // this may make the visualizer lag behind but its unnoticeable and instead improves performance
-        Long2ObjectMap<ChunkStatus> statuses = storingChunkProgressListener.getStatuses();
-        LongSet unloaded = storingChunkProgressListener.getUnloaded();
-
-        ChunkPos spawnPos = storingChunkProgressListener.getSpawnPos();
-        int r = storingChunkProgressListener.getRadius();
-
-        if (spacing != 0) {
-            WGLoadingScreen.fill(poseStack, xCenter - chunkRadius, yCenter - chunkRadius, xCenter - chunkRadius + 1, yCenter + chunkRadius, colorOutline);
-            WGLoadingScreen.fill(poseStack, xCenter + chunkRadius - 1, yCenter - chunkRadius, xCenter + chunkRadius, yCenter + chunkRadius, colorOutline);
-            WGLoadingScreen.fill(poseStack, xCenter - chunkRadius, yCenter - chunkRadius, xCenter + chunkRadius, yCenter - chunkRadius + 1, colorOutline);
-            WGLoadingScreen.fill(poseStack, xCenter - chunkRadius, yCenter + chunkRadius - 1, xCenter + chunkRadius, yCenter + chunkRadius, colorOutline);
-        }
-
-        // Fill the background
-        WGLoadingScreen.fill(poseStack, xMin, yMin, xMax, yMax, colorBackground);
 
         // Display the chunks
-        for (int v = 0; v < diameter; ++v) {
-            for (int w = 0; w < diameter; ++w) {
-                ChunkStatus chunkStatus = getStatusLocal(statuses, spawnPos, r, v, w);
-                int x = left + v * blockSize;
-                int xEnd = x + chunkDrawSize;
-                int y = top + w * blockSize;
-                int yEnd = y + chunkDrawSize;
-
-                if ((xMin <= x && xEnd <= xMax) && (yMin <= y && yEnd <= yMax)) { // Don't allow drawing outside the border
-                    final boolean isUnloaded = isUnloadedLocal(unloaded, spawnPos, r, v, w);
-                    final int color = (isUnloaded ? COLORS_UNLOADED.getInt(chunkStatus) : COLORS.getInt(chunkStatus)) | 0xFF000000;
-                    WGLoadingScreen.fill(poseStack, x, y, xEnd, yEnd, color);
-                }
-            }
+        switch ((int) (frameCounter++ % 5)) {
+            case 0 -> progressImg.fillRect(0, 0, diameter, diameter, 0xFF000000);
+            case 1 -> updateTexture(diameter, chunkProgressListener);
+            case 2 -> progressTexture.upload();
         }
+
+        // Render the texture
+        renderTexture(xMin, yMin, xMax, yMax, diameter);
 
         // Create a border
         WGLoadingScreen.fill(poseStack, xMin-1, yMin-1, xMax+1, yMin, colorBorder); // Right
         WGLoadingScreen.fill(poseStack, xMax, yMin, xMax+1, yMax, colorBorder); // Down
         WGLoadingScreen.fill(poseStack, xMin-1, yMax, xMax+1, yMax+1, colorBorder); // Left
         WGLoadingScreen.fill(poseStack, xMin-1, yMin, xMin, yMax, colorBorder); // Up
+    }
+
+    public void updateTexture(int diameter, WGChunkProgressListener chunkProgressListener) {
+        // Get synchronized versions for this update in bulk so it does not have to be done for each chunk,
+        // this may make the visualizer lag behind but its unnoticeable and instead improves performance
+        Long2ObjectMap<ChunkStatus> statuses = chunkProgressListener.getStatuses();
+        LongSet unloaded = chunkProgressListener.getUnloaded();
+
+        ChunkPos spawnPos = chunkProgressListener.getSpawnPos();
+        int r = chunkProgressListener.getRadius();
+        for (int v = 0; v < diameter; ++v) {
+            for (int w = 0; w < diameter; ++w) {
+                final ChunkStatus chunkStatus = getStatusLocal(statuses, spawnPos, r, v, w);
+                final boolean isUnloaded = isUnloadedLocal(unloaded, spawnPos, r, v, w);
+                final int color = (isUnloaded ? COLORS_UNLOADED.getInt(chunkStatus) : COLORS.getInt(chunkStatus));
+                progressImg.setPixelRGBA(v, w, color);
+            }
+        }
+    }
+
+    public void renderTexture(double xMin, double yMin, double xMax, double yMax, float diameter) {
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, progressTexture.getId());
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.vertex(xMin, yMax, 0.0).uv(0.0F, 1.0F).color(255, 255, 255, 255).endVertex();
+        bufferBuilder.vertex(xMax, yMax, 0.0).uv(1.0F, 1.0F).color(255, 255, 255, 255).endVertex();
+        bufferBuilder.vertex(xMax, yMin, 0.0).uv(1.0F, 0.0F).color(255, 255, 255, 255).endVertex();
+        bufferBuilder.vertex(xMin, yMin, 0.0).uv(0.0F, 0.0F).color(255, 255, 255, 255).endVertex();
+        tesselator.end();
     }
 
     /**

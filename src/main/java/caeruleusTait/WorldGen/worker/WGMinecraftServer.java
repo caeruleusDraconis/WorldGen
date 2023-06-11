@@ -43,7 +43,7 @@ public class WGMinecraftServer extends MinecraftServer {
 
     @Override
     public PlayerList getPlayerList() {
-        return new PlayerListAdapter(this);
+        return new PlayerListAdapter(this, main);
     }
 
     @Override
@@ -59,6 +59,11 @@ public class WGMinecraftServer extends MinecraftServer {
     public Executor executor() {
         //return ((MinecraftServerAccessor) this).getExecutor();
         return Runnable::run;
+    }
+
+    @Override
+    public boolean isDedicatedServer() {
+        return false;
     }
 
     @Override
@@ -88,11 +93,6 @@ public class WGMinecraftServer extends MinecraftServer {
 
     @Override
     public SystemReport fillServerSystemReport(SystemReport systemReport) {
-        throw new RuntimeException("NyI");
-    }
-
-    @Override
-    public boolean isDedicatedServer() {
         throw new RuntimeException("NyI");
     }
 

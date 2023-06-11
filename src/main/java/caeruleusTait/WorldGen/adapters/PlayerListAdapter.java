@@ -3,14 +3,16 @@
 
 package caeruleusTait.WorldGen.adapters;
 
+import caeruleusTait.WorldGen.worker.WGMain;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
 
 public class PlayerListAdapter extends PlayerList {
     public PlayerListAdapter(
-            MinecraftServer minecraftServer
+            MinecraftServer minecraftServer,
+            WGMain main
     ) {
-        super(minecraftServer, null, null, 0);
+        super(minecraftServer, main.worldStem().registries(), null, 0);
     }
 
     @Override

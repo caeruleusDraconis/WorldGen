@@ -1,6 +1,5 @@
 package caeruleusTait.WorldGen.worker;
 
-import caeruleusTait.WorldGen.WorldGen;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
@@ -59,18 +58,31 @@ public class WGChunkGenWorkHost {
     }
 
     private synchronized void distributeWork(List<WGChunkWorkUnit> workList) {
+        if(aborted) {
+            // Don't distribute when we are aborted
+            return;
+        }
+
         // Start a new Thread for each task and start it
         for(WGChunkWorkUnit workUnit : workList) {
             if(this.activeThreads.size() >= maxThreads)
                 break;
 
-            Thread newWorker = new Thread(() -> workUnit.startWork(this::onWorkUnitCompleted, workUnit), "WG-Worker-"  + threadID);
+            Thread newWorker = new Thread(
+                    () -> workUnit.startWork(this::onWorkUnitCompleted, this::onWorkFailed, workUnit),
+                    "WG-Worker-" + threadID);
 
             newWorker.start();
 
             this.activeThreads.add(newWorker);
             ++threadID;
         }
+    }
+
+    private boolean onWorkFailed(WGChunkWorkUnit failedUnit) {
+        this.aborted = true; // Set this flag first, otherwise WGMain will attempt to make the workers join themselves.
+        wgmain.abortWork();
+        return false;
     }
 
     public boolean onWorkUnitCompleted(WGChunkWorkUnit completedUnit) {
@@ -99,7 +111,7 @@ public class WGChunkGenWorkHost {
         }
 
         // And then recycle the thread to do another task
-        return readyWork.get(0).startWork(this::onWorkUnitCompleted, readyWork.get(0));
+        return readyWork.get(0).startWork(this::onWorkUnitCompleted,this::onWorkFailed, readyWork.get(0));
     }
 
 

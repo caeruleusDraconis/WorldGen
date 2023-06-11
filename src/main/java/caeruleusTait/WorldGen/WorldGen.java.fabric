@@ -3,10 +3,8 @@
 
 package caeruleusTait.WorldGen;
 
-import caeruleusTait.WorldGen.worker.WGInlineLeveLightEngine;
 import caeruleusTait.WorldGen.worker.WGLevel;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +19,12 @@ public class WorldGen implements ModInitializer {
 	public static WGLevel currentLevel = null;
 	public static ThreadLocal<LevelLightEngine> writeLightEngine = new ThreadLocal<>();
 
+    public static void onFakeServerStart() {
+    }
+
+    public static void onFakeServerStop() {
+    }
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -30,5 +34,29 @@ public class WorldGen implements ModInitializer {
 		// ScreenEvents.AFTER_INIT.register(SelectWorldScreenListener::afterInit);
 
 		LOGGER.info("WorldGen initialized");
+
+		/* Test code for the world generation
+		List<OreConfiguration.TargetBlockState> replacementes = List.of(
+				OreConfiguration.target(OreFeatures.STONE_ORE_REPLACEABLES, Blocks.GLOWSTONE.defaultBlockState()),
+				OreConfiguration.target(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, Blocks.GLOWSTONE.defaultBlockState())
+		);
+
+		ConfiguredFeature<?, ?> feature = new ConfiguredFeature<>(Feature.ORE, new OreConfiguration(replacementes, 11));
+
+		PlacedFeature testGlowsoneOre = new PlacedFeature(Holder.direct(feature), List.of(
+				CountPlacement.of(8),
+				InSquarePlacement.spread(),
+				HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(64)),
+				BiomeFilter.biome()
+		));
+
+		Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, new ResourceLocation("world_gen", "test_glowstone_ore"), feature);
+		Registry.register(BuiltinRegistries.PLACED_FEATURE, new ResourceLocation("world_gen", "test_glowstone_ore"), testGlowsoneOre);
+		BiomeModifications.addFeature(
+				BiomeSelectors.foundInOverworld(),
+				GenerationStep.Decoration.UNDERGROUND_ORES,
+				ResourceKey.create(Registry.PLACED_FEATURE_REGISTRY, new ResourceLocation("world_gen", "test_glowstone_ore"))
+		);
+		 */
 	}
 }
