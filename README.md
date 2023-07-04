@@ -54,10 +54,11 @@ the world must be opened in a Minecraft client and cannot be loaded elsewhere wh
 
 This table shows the current support status for the Minecraft version.
 
-| Minecraft Version | Status    |
-|-------------------|-----------|
-| `1.18.2`          | Supported |
-| `1.19`            | Supported |
+| Minecraft Version | Status            |
+|-------------------|-------------------|
+| `1.20`            | Supported         |
+| `1.19`            | No future updates |
+| `1.18.2`          | No future updates |
 
 ## FAQ
 
@@ -106,3 +107,12 @@ However, mods that interfere with the Minecraft world generation process might p
 | Mod           | Failure                                                  |
 |---------------|----------------------------------------------------------|
 | **Starlight** | Chunks generated with WorldGen will have **no** lighting |
+
+# Acknowledgments
+
+Many thanks to the following projects for supporting open source development:
+
+- GitHub for free code hosting
+- The [Java profiler - JProfiler](https://www.ej-technologies.com/products/jprofiler/overview.html) for providing a profiling tool
+
+[![JProfiler](https://www.ej-technologies.com/images/product_banners/jprofiler_large.png)](https://www.ej-technologies.com/products/jprofiler/overview.html)
